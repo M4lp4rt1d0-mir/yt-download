@@ -37,14 +37,12 @@ Ao executar o script, você pode passar os seguintes argumentos para personaliza
 
 ---
 
-👥 Desenvolvedores
-Sinta-se à vontade para entrar em contato ou pull requests para melhorias!
-
-@Marcos Xavier</br>
-📧 Email: sis.marcosxavier@gmail.com</br>
-🐙 GitHub: @marcosxavierdev</br>
-@Brenno m4lp4rt1d0</br>
-📧 Email: sbrennopqd@gmail.com</br>
-🐙 GitHub: @M4lp4rt1d0-mir</br>
+## 👥 Desenvolvedores
+| 👥 DEVs | 📧 Email | 🐙 GitHub |
+| :-- | :-- | :-- |
+|@Marcos Xavier | sis.marcosxavier@gmail.com | [**@marcosxavierdev**](https://github.com/marcosxavierdev) |
+| @Brenno m4lp4rt1d0 | sbrennopqd@gmail.com | [**@M4lp4rt1d0-mir**](https://github.com/M4lp4rt1d0-mir) |
 
 🔧 Versão Atual do Projeto: 1.4.6
+
+Sinta-se à vontade para entrar em contato ou pull requests para melhorias!
