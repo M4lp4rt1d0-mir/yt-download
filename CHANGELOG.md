@@ -5,6 +5,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## Origem
+
+A primeira versão deste projeto foi criada em **07/04/2026** por S. Brenno (Python)
+e pelo marido da sua prima Marcos Xavier (Java), inicialmente apenas por diversão. O que começou
+como brincadeira entre amigos evoluiu para o downloader modular atual.
+
 ## [1.7.0] - 2026-11-25
 
 ### Adicionado
@@ -31,6 +37,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Flag `--no-auto-deps` para desativar instalação automática de pacotes Python
 - Flag `--platform` aceita: `YT`, `ITG`, `FB`, `TW` (padrão: `YT`)
 - Detecção automática de plataforma pela URL quando `-p` não especificado
+- Detecção de erros de conexão (sem internet / site fora do ar) com mensagem clara
+  na leitura de metadados, no download e na instalação do `yt-dlp`
 
 ### Alterado
 - Refatoração completa mantendo **compatibilidade total** com YouTube e Instagram
@@ -41,6 +49,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Corrigido
 - Organização de pastas por plataforma padronizada
 - Imports com `TYPE_CHECKING` para evitar dependências circulares
+- Mensagem de conclusão agora aparece para **todas** as plataformas (YT, ITG, FB e TW),
+  informando a pasta dos arquivos; falhas também exibem aviso claro
+- Mensagem do Instagram centralizada no `main.py` (evita duplicação)
+- Cookies do Instagram também são salvos quando a plataforma é detectada automaticamente (`AUTO`)
 
 ## [1.6.4] - 2026-11-25
 
@@ -89,12 +101,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Flags `--cookies`, `--cookie-file` e `--forget-cookies`
 - `ignoreerrors=False` para não imprimir sucesso quando o download falha
 
-## [1.4.6] - Data não registrada
+## [1.4.6] - 2026-04-09
 
 ### Mantido
 - Versão do downloader original apenas de YouTube (`main.py`), preservada como referência
 
-## [1.0.0] - Data não registrada
+## [1.0.0] - 2026-04-07
 
 ### Adicionado
 - Primeira versão registrada do projeto (`youtube_downloader.py`)

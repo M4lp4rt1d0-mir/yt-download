@@ -127,13 +127,23 @@ def build_changelog() -> str:
 HISTÓRICO DE VERSÕES - main.py
 ====================================================================={RESET}
 
+{AZUL}ORIGEM DO PROJETO{RESET}
+  + Criado em 07/04/2026 por S. Brenno (Python) e pelo marido da sua prima (Java),
+    inicialmente apenas por diversão. De brincadeira ao downloader modular atual.
+
 {VERDE}[1.7.0] - 25/11/2026{RESET}
   + Adicionado: Suporte para Facebook (-p FB) e Twitter/X (-p TW)
   + Adicionado: Nova arquitetura modular (cli/, config/, deps/, downloader/, platforms/)
   + Adicionado: install_deps.bat (Windows) e install_deps.sh (Linux) para dependências de sistema
   + Adicionado: Flag --no-auto-deps para desativar instalação automática de pacotes Python
+  + Adicionado: Detecção de erros de conexão (sem internet / site fora do ar) com
+    mensagem clara na leitura de metadados, no download e na instalação do yt-dlp
   + Alterado: Refatoração completa mantendo compatibilidade total com YT e ITG
   + Corrigido: Organização de pastas por plataforma (FB: facebook_downloads, TW: twitter_downloads)
+  + Corrigido: Mensagem de conclusão para todas as plataformas (YT, ITG, FB e TW),
+    com pasta dos arquivos e aviso claro em caso de falha
+  + Corrigido: Mensagem do Instagram centralizada no main.py (sem duplicação)
+  + Corrigido: Cookies do Instagram também são salvos quando a plataforma é detectada automaticamente (AUTO)
 
 {VERDE}[1.6.4] - 25/11/2026{RESET}
   + Adicionado: requirements.txt com yt-dlp>=2026.03.17 e notas sobre

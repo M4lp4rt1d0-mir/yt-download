@@ -240,7 +240,6 @@ def _attempt_recovery(
             success, error = run_download(url, opts, output_path)
             if success:
                 remember_auth("ITG", escolha)
-                print(f"\n{VERDE}Processo concluído com sucesso! Verifique a pasta base: {output_path}{RESET}")
                 return True
             print(f"{AMARELO}   Não funcionou: {error}{RESET}")
             if not _is_auth_error(error):
@@ -274,7 +273,6 @@ def _attempt_recovery(
         success, error = run_download(url, opts, output_path)
         if success:
             remember_auth("ITG", escolha)
-            print(f"\n{VERDE}Processo concluído com sucesso! Verifique a pasta base: {output_path}{RESET}")
             return True
 
         print(f"{VERMELHO}Tentativa {attempts} falhou: {error}{RESET}")
@@ -354,7 +352,6 @@ class InstagramPlatform(PlatformBase):
         # Try initial download
         success, error = run_download(url, ydl_opts, output_path)
         if success:
-            print(f"\n{VERDE}Processo concluído com sucesso! Verifique a pasta base: {output_path}{RESET}")
             return True, ""
 
         # Handle errors

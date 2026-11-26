@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from cli.output import print_info, print_success, print_error, print_warning
+from downloader.network import report_network_error
 
 if TYPE_CHECKING:
     from cli.args import Args
@@ -45,7 +46,8 @@ def install_python_deps() -> None:
                     [sys.executable, "-m", "pip", "install", package_name, "--quiet"]
                 )
                 print_success(f"Pacote '{package_name}' instalado.")
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
+                report_network_error(getattr(e, "output", "") or e)
                 print_error(f"Falha ao instalar '{package_name}'.")
                 sys.exit(1)
     print_success("Dependências Python atualizadas.\n")

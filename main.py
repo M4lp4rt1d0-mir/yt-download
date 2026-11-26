@@ -13,11 +13,13 @@ from cli.args import parse_args, print_help, print_changelog
 from cli.output import print_info, print_success, print_error, print_warning
 from config.store import forget_auth
 from deps.system import check_python_deps, install_python_deps, check_ytdlp_version, check_system_deps
+from downloader.network import report_network_error, reset_network_report
 from platforms import get_platform, detect_platform_from_url, list_platforms
 
 
 def main() -> None:
     args = parse_args()
+    reset_network_report()
 
     # Handle special flags first
     if args.changelog:
@@ -95,8 +97,15 @@ def main() -> None:
     success, error = platform.download(args.url, opts, output_path, fmt_opts)
 
     if success:
+        # One confirmation for every platform - aimed at non-technical users
+        final_dir = output_path / fmt_opts.subdir
+        print_success("\nDownload concluído com sucesso!")
+        print_info(f"Plataforma: {platform.info.display_name}")
+        print_info(f"Arquivo(s) salvo(s) em: {final_dir}")
+        print_info("Pode fechar a janela agora.")
+
         # Save auth for Instagram (and other platforms if they implement it)
-        if args.platform == "ITG":
+        if platform_name == "ITG":
             if args.cookie_file:
                 from config.store import remember_auth
                 remember_auth("ITG", {"cookie_file": str(Path(args.cookie_file).resolve())})
@@ -105,6 +114,8 @@ def main() -> None:
                 remember_auth("ITG", {"browser": args.cookies})
         sys.exit(0)
     else:
+        if not report_network_error(error):
+            print_error("\nDownload não concluído. Confira a mensagem de erro acima e tente novamente.")
         sys.exit(1)
 
 

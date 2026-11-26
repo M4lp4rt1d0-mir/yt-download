@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import yt_dlp
 
 from cli.output import print_info, print_warning
+from downloader.network import report_network_error
 
 if TYPE_CHECKING:
     from downloader.formats import FormatOptions
@@ -61,6 +62,7 @@ def run_download(
                 print_warning(f"HTTP 403 na tentativa {attempt}/{max_attempts}: URL expirada ou bloqueada — limpando parciais e retentando...")
                 cleanup_partial_files(output_path)
                 continue
+            report_network_error(error)
             return False, error
 
     return False, ""
@@ -81,5 +83,6 @@ def extract_info_flat(url: str, ydl_opts: dict | None = None) -> dict | None:
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             return ydl.extract_info(url, download=False)
-    except Exception:
+    except Exception as e:
+        report_network_error(e)
         return None
