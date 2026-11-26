@@ -19,7 +19,7 @@ def load_config() -> dict[str, Any]:
         if CONFIG_PATH.is_file():
             with CONFIG_PATH.open("r", encoding="utf-8") as f:
                 return json.load(f)
-    except Exception:
+    except Exception:  # nosec B110 - silently handle missing/corrupt config file
         pass
     return {}
 
@@ -71,6 +71,11 @@ def forget_auth(platform: str) -> None:
     save_config(config)
 
 
+def get_auth(platform: str) -> dict[str, Any] | None:
+    """Get saved auth for a platform (alias for get_saved_auth)."""
+    return get_saved_auth(platform)
+
+
 def validate_cookie_file(path: str) -> bool:
     """Warn if cookie file doesn't contain sessionid."""
     try:
@@ -80,6 +85,6 @@ def validate_cookie_file(path: str) -> bool:
             print_warning("O arquivo não contém o cookie 'sessionid'. "
                           "O Instagram provavelmente continuará pedindo login.")
             return False
-    except Exception:
+    except Exception:  # nosec B110 - silently handle unreadable cookie file
         pass
     return True

@@ -6,7 +6,7 @@ import glob
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import yt_dlp
 
@@ -36,7 +36,7 @@ def cleanup_partial_files(output_path: str | Path) -> None:
 
 def run_download(
     url: str,
-    ydl_opts: dict,
+    ydl_opts: dict[str, Any],
     output_path: str | Path,
     max_attempts: int = 3,
 ) -> tuple[bool, str]:
@@ -59,7 +59,10 @@ def run_download(
             error = str(e)
             is_403 = "403" in error or "forbidden" in error.lower()
             if attempt < max_attempts and is_403:
-                print_warning(f"HTTP 403 na tentativa {attempt}/{max_attempts}: URL expirada ou bloqueada — limpando parciais e retentando...")
+                print_warning(
+                    f"HTTP 403 na tentativa {attempt}/{max_attempts}: "
+                    f"URL expirada ou bloqueada — limpando parciais e retentando..."
+                )
                 cleanup_partial_files(output_path)
                 continue
             report_network_error(error)
@@ -68,9 +71,9 @@ def run_download(
     return False, ""
 
 
-def extract_info_flat(url: str, ydl_opts: dict | None = None) -> dict | None:
+def extract_info_flat(url: str, ydl_opts: dict[str, Any] | None = None) -> dict[str, Any] | None:
     """Extract info without downloading (for playlist detection)."""
-    opts = {
+    opts: dict[str, Any] = {
         "extract_flat": True,
         "quiet": True,
         "ignoreerrors": True,

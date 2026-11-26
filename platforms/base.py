@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable, Any
 
 if TYPE_CHECKING:
     from cli.args import Args
@@ -50,7 +50,7 @@ class PlatformProtocol(PlatformBase, Protocol):
         ...
 
     @abstractmethod
-    def prepare_opts(self, args: Args, url: str) -> dict:
+    def prepare_opts(self, args: Args, url: str) -> dict[str, Any]:
         """Prepare yt-dlp options for this platform/URL."""
         ...
 
@@ -58,7 +58,7 @@ class PlatformProtocol(PlatformBase, Protocol):
     def download(
         self,
         url: str,
-        opts: dict,
+        opts: dict[str, Any],
         output_path: Path,
         fmt_opts: FormatOptions,
     ) -> tuple[bool, str]:

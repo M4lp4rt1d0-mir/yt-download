@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from platforms.base import PlatformBase
@@ -21,7 +21,7 @@ class FormatOptions:
     playlist_title: str | None = None
 
 
-def build_ydl_opts(base_opts: dict, fmt: FormatOptions) -> dict:
+def build_ydl_opts(base_opts: dict[str, Any], fmt: FormatOptions) -> dict[str, Any]:
     """Build complete yt-dlp options from base + format options."""
     opts = dict(base_opts)
 
@@ -59,7 +59,7 @@ def build_ydl_opts(base_opts: dict, fmt: FormatOptions) -> dict:
     return opts
 
 
-def detect_playlist(info: dict | None) -> tuple[bool, str | None]:
+def detect_playlist(info: dict[str, Any] | None) -> tuple[bool, str | None]:
     """Detect if URL is a multi-item playlist."""
     if not info or info.get("_type") != "playlist":
         return False, None

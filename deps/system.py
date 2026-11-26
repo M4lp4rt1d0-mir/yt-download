@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from cli.args import Args
 
 
-REQUIRED_PACKAGES = {
+REQUIRED_PACKAGES: dict[str, str] = {
     "yt-dlp": "yt_dlp",
 }
 
@@ -27,7 +27,7 @@ def check_python_deps() -> bool:
     for package_name, import_name in REQUIRED_PACKAGES.items():
         try:
             __import__(import_name)
-            print(f"  [OK] '{package_name}' já está instalado.")
+            print_info(f"  [OK] '{package_name}' já está instalado.")
         except ImportError:
             print_warning(f"Pacote '{package_name}' não encontrado.")
             all_ok = False
@@ -67,14 +67,14 @@ def check_ytdlp_version() -> None:
                     f"yt-dlp {yt_dlp.version.__version__} tem {age} dias. "
                     f"Considere atualizar: python -m pip install -U yt-dlp"
                 )
-    except Exception:
+    except Exception:  # nosec B110 - silently handle version check failures
         pass
 
 
 def _check_ffmpeg() -> bool:
     """Check if FFmpeg is available."""
     if shutil.which("ffmpeg"):
-        print(f"  [OK] FFmpeg encontrado no sistema.")
+        print_info("  [OK] FFmpeg encontrado no sistema.")
         return True
     return False
 
@@ -82,7 +82,7 @@ def _check_ffmpeg() -> bool:
 def _check_nodejs() -> bool:
     """Check if Node.js is available."""
     if shutil.which("node"):
-        print(f"  [OK] Node.js encontrado no sistema.")
+        print_info("  [OK] Node.js encontrado no sistema.")
         return True
     return False
 
@@ -97,7 +97,8 @@ def _run_system_installer() -> bool:
             return False
         print_info("Executando instalador de dependências do Windows...")
         try:
-            subprocess.run([str(installer)], check=False, shell=True)
+            # shell=False is safe for .bat files on Windows (no shell injection risk)
+            subprocess.run([str(installer)], check=False, shell=False)
             return True
         except Exception as e:
             print_error(f"Falha ao executar instalador: {e}")

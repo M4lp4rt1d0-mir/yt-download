@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from platforms.base import PlatformInfo, PlatformProtocol, PlatformBase, register_platform
 from downloader.core import run_download, extract_info_flat
@@ -31,16 +31,17 @@ class YouTubePlatform(PlatformBase):
     )
 
     def detect_url(self, url: str) -> bool:
+        """Check if URL belongs to YouTube."""
         url_lower = url.lower()
         return any(pattern in url_lower for pattern in self.info.url_patterns)
 
-    def prepare_opts(self, args: Args, url: str) -> dict:
+    def prepare_opts(self, args: Args, url: str) -> dict[str, Any]:
         """Prepare base yt-dlp options for YouTube."""
         # Check for playlist
         info = extract_info_flat(url)
         is_playlist, playlist_title = detect_playlist(info)
 
-        opts = {
+        opts: dict[str, Any] = {
             "ignoreerrors": False,
             "quiet": False,
             "noplaylist": False,
@@ -63,7 +64,7 @@ class YouTubePlatform(PlatformBase):
     def download(
         self,
         url: str,
-        opts: dict,
+        opts: dict[str, Any],
         output_path: Path,
         fmt_opts: FormatOptions,
     ) -> tuple[bool, str]:

@@ -14,7 +14,10 @@ if TYPE_CHECKING:
     from cli.output import VERMELHO, VERDE, AMARELO, AZUL, RESET
 
 # Lazy imports for colors to avoid circular deps
-def _get_colors():
+
+
+def _get_colors() -> tuple[str, str, str, str, str]:
+    """Get color codes lazily to avoid circular imports."""
     from cli.output import VERMELHO, VERDE, AMARELO, AZUL, RESET
     return VERMELHO, VERDE, AMARELO, AZUL, RESET
 
@@ -22,6 +25,7 @@ def _get_colors():
 @dataclass
 class Args:
     """Parsed command line arguments."""
+
     url: str | None
     resolution: str
     output: str | None
@@ -240,9 +244,11 @@ def parse_args(argv: list[str] | None = None) -> Args:
 
 def print_help() -> None:
     """Print the usage instructions."""
-    print(build_instructions())
+    from cli.output import print_info
+    print_info(build_instructions())
 
 
 def print_changelog() -> None:
     """Print the changelog."""
-    print(build_changelog())
+    from cli.output import print_info
+    print_info(build_changelog())

@@ -7,10 +7,9 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from config.store import (
-    get_saved_auth,
     remember_auth,
     validate_cookie_file,
     CONFIG_PATH,
@@ -116,7 +115,7 @@ def _find_cookie_candidates(extra_dirs: list[str] | None = None) -> list[str]:
     return found[:30]
 
 
-def _opts_with_auth(base_opts: dict, escolha: dict) -> dict:
+def _opts_with_auth(base_opts: dict[str, Any], escolha: dict[str, Any]) -> dict[str, Any]:
     """Apply auth choice to yt-dlp options."""
     opts = dict(base_opts)
     opts.pop("cookiesfrombrowser", None)
@@ -128,7 +127,7 @@ def _opts_with_auth(base_opts: dict, escolha: dict) -> dict:
     return opts
 
 
-def _ask_browser_choice(detected: list[str] | None = None) -> dict | None:
+def _ask_browser_choice(detected: list[str] | None = None) -> dict[str, Any] | None:
     """Step 2: ask user which browser they use."""
     print(f"\n{AMARELO}{'=' * 72}{RESET}")
     print(f"{AMARELO}Não consegui baixar automaticamente.{RESET}")
@@ -173,7 +172,7 @@ def _ask_browser_choice(detected: list[str] | None = None) -> dict | None:
         print(f"{VERMELHO}Opção inválida.{RESET}")
 
 
-def _hunt_cookie_files() -> dict | None:
+def _hunt_cookie_files() -> dict[str, Any] | None:
     """Step 3: hunt for cookie files automatically."""
     print(f"\n{AZUL}Procurando arquivos de cookies nos locais mais prováveis...{RESET}")
     candidates = _find_cookie_candidates()
@@ -214,7 +213,7 @@ def _hunt_cookie_files() -> dict | None:
 
 def _attempt_recovery(
     url: str,
-    base_opts: dict,
+    base_opts: dict[str, Any],
     output_path: Path,
 ) -> bool:
     """3-step recovery flow: running browsers -> ask -> hunt files."""
@@ -301,10 +300,11 @@ class InstagramPlatform(PlatformBase):
     )
 
     def detect_url(self, url: str) -> bool:
+        """Check if URL belongs to Instagram."""
         url_lower = url.lower()
         return any(pattern in url_lower for pattern in self.info.url_patterns)
 
-    def prepare_opts(self, args: Args, url: str) -> dict:
+    def prepare_opts(self, args: Args, url: str) -> dict[str, Any]:
         """Prepare base yt-dlp options for Instagram."""
         # Block Stories
         if "/stories/" in url.lower():
@@ -316,7 +316,7 @@ class InstagramPlatform(PlatformBase):
         info = extract_info_flat(url)
         is_playlist, playlist_title = detect_playlist(info)
 
-        opts = {
+        opts: dict[str, Any] = {
             "ignoreerrors": False,
             "quiet": False,
             "noplaylist": False,
@@ -336,7 +336,7 @@ class InstagramPlatform(PlatformBase):
     def download(
         self,
         url: str,
-        opts: dict,
+        opts: dict[str, Any],
         output_path: Path,
         fmt_opts: FormatOptions,
     ) -> tuple[bool, str]:

@@ -12,12 +12,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 from cli.args import parse_args, print_help, print_changelog
 from cli.output import print_info, print_success, print_error, print_warning
 from config.store import forget_auth
-from deps.system import check_python_deps, install_python_deps, check_ytdlp_version, check_system_deps
+from deps.system import (
+    check_python_deps,
+    install_python_deps,
+    check_ytdlp_version,
+    check_system_deps,
+)
 from downloader.network import report_network_error, reset_network_report
 from platforms import get_platform, detect_platform_from_url, list_platforms
 
 
 def main() -> None:
+    """Main entry point."""
     args = parse_args()
     reset_network_report()
 
@@ -42,7 +48,7 @@ def main() -> None:
     else:
         # Still verify imports work
         try:
-            import yt_dlp
+            import yt_dlp  # noqa: F401
         except ImportError as e:
             print_error(f"Falha ao importar yt-dlp: {e}")
             print_error("Execute sem --no-auto-deps ou instale manualmente: pip install yt-dlp")
