@@ -1,0 +1,13 @@
+# Python dependencies
+yt-dlp>=2026.03.17
+
+# System dependencies (NOT installed via pip - use installer scripts):
+# - FFmpeg: required for audio/video merging and conversion
+#   Windows: winget install Gyan.FFmpeg  OR  choco install ffmpeg
+#   Linux: sudo apt install ffmpeg / sudo dnf install ffmpeg / sudo pacman -S ffmpeg
+#   Manual: https://www.gyan.dev/ffmpeg/builds/
+#
+# - Node.js (LTS): required for yt-dlp's JavaScript runtime (YouTube/Instagram extractors)
+#   Windows: winget install OpenJS.NodeJS.LTS  OR  choco install nodejs-lts
+#   Linux: curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt install nodejs
+#   Manual: https://nodejs.org/

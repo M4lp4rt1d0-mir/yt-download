@@ -1,225 +1,111 @@
+#!/usr/bin/env python3
+"""Main entry point for the modular downloader."""
+
+from __future__ import annotations
+
 import sys
-import subprocess
-import os
-import shutil
+from pathlib import Path
+
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+from cli.args import parse_args, print_help, print_changelog
+from cli.output import print_info, print_success, print_error, print_warning
+from config.store import forget_auth
+from deps.system import check_python_deps, install_python_deps, check_ytdlp_version, check_system_deps
+from platforms import get_platform, detect_platform_from_url, list_platforms
 
 
-REQUIRED_PACKAGES = {
-    'yt-dlp': 'yt_dlp',
-    'curl-cffi': 'curl_cffi'
-}
+def main() -> None:
+    args = parse_args()
 
-
-VERMELHO = '\033[91m'
-VERDE = '\033[92m'
-AMARELO = '\033[93m'
-AZUL = '\033[94m'
-RESET = '\033[0m'
-
-INSTRUCOES = f"""{AMARELO}#########################################################################################################
-                                         MANUAL DE USO
-#########################################################################################################{RESET}
-{VERDE}=========================================================================================================
-| Parâmetro   | Nome Completo          | Descrição                                | Padrão (Default)    |
-=========================================================================================================
-| url         | URL (VIDEOS)           | Link do vídeo ou da playlist.            | Obrigatório         |
-|             |                        | (SEMPRE USE ASPAS DUPLAS "")             |                     |
-|-------------|------------------------|------------------------------------------|---------------------|
-| -r          | --resolution           | Define a resolução máxima do             | 1080p               |
-|             |                        | vídeo (ex: 1080p, 720p, 480p).           |                     |
-|-------------|------------------------|------------------------------------------|---------------------|
-| -o          | --output_path          | Nome da pasta onde o arquivo será salvo. | Youtube_Downloads   |
-|             |                        | (Não utilize espaços no nome!)           |                     |
-|-------------|------------------------|------------------------------------------|---------------------|
-| -a          | --audio_only           | Flag que ativa o modo econômico. Baixa   | Desativado          |
-|             |                        | apenas o áudio e converte em MP3.        |                     |
-========================================================================================================={RESET}
-
-{VERDE}Exemplos de execução (Vídeo):{RESET}
-    python main.py -r 1080p -o C:\"Users\SEU_USUARIO\Downloads "https://www.youtube.com/watch?v=EXEMPLO"
-
-{VERDE}Exemplos de execução (Áudio):{RESET}
-    python main.py "https://www.youtube.com/watch?v=EXEMPLO" -a -o C:\"Users\SEU_USUARIO\Downloads
-
-{VERDE}Exemplos de execução (Playlist - vídeo):{RESET}
-    python main.py "https://www.youtube.com/playlist?list=EXEMPLO" -r 480p
-
-{VERDE}Exemplos de execução (Playlist - Áudio):{RESET}
-    python main.py -a "https://www.youtube.com/playlist?list=EXEMPLO"
-
-----------------------------------------------------------------------
-@author: sis.marcosxavier@gmail.com
-Github: https://github.com/marcosxavierdev
-@author: sbrennopqd@gmail.com
-Github: https://github.com/M4lp4rt1d0-mir
-{AZUL}@version: 1.4.6{RESET}
-======================================================================
-"""
-
-
-def install_python_dependencies():
-    print(f"{AZUL}Verificando pacotes Python do script...{RESET}")
-    is_ready = True
-    for package_name, import_name in REQUIRED_PACKAGES.items():
-        try:
-            __import__(import_name)
-            print(f"  [OK] '{package_name}' já está instalado.")
-        except ImportError:
-            print(f"  {AMARELO}[AVISO] Pacote '{package_name}' não encontrado. Instalando...{RESET}")
-            is_ready = False
-            try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package_name, "--quiet"])
-                print(f"  {VERDE}[SUCESSO] Pacote '{package_name}' instalado.{RESET}")
-            except subprocess.CalledProcessError:
-                print(f"  {VERMELHO}[ERRO] Falha ao instalar '{package_name}'.{RESET}")
-                sys.exit(1)
-    if not is_ready:
-        print(f"\n{VERDE}Dependências Python atualizadas.{RESET}\n")
-
-
-def check_ffmpeg():
-    if shutil.which("ffmpeg"):
-        print(f"  [OK] FFmpeg encontrado no sistema.")
-        return True
-    else:
-        print(f"\n  {AMARELO}[AVISO] FFmpeg não encontrado. Iniciando instalação automática...{RESET}")
-        if sys.platform.startswith("linux"):
-            print(f"  {AZUL}O sistema pode pedir sua senha (sudo) para instalar pacotes do Linux.{RESET}")
-            try:
-                subprocess.check_call("sudo apt update && sudo apt install ffmpeg -y", shell=True)
-                print(f"  {VERDE}[SUCESSO] FFmpeg instalado corretamente!{RESET}")
-                return True
-            except subprocess.CalledProcessError:
-                print(f"  {VERMELHO}[ERRO] Falha na instalação automática do FFmpeg.{RESET}")
-                return False
-        else:
-            print(f"  {VERMELHO}[ERRO] Auto-instalação suportada apenas no Linux. Instale o FFmpeg manualmente.{RESET}")
-            return False
-
-
-def check_nodejs():
-    if shutil.which("node") or shutil.which("nodejs"):
-        print(f"  [OK] Node.js encontrado no sistema.")
-        return True
-    else:
-        print(f"\n  {AMARELO}[AVISO] Node.js não encontrado. Iniciando instalação automática (Versão 20)...{RESET}")
-        if sys.platform.startswith("linux"):
-            print(f"  {AZUL}O sistema pode pedir sua senha (sudo) para instalar pacotes do Linux.{RESET}")
-            try:
-                cmd = "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs"
-                subprocess.check_call(cmd, shell=True)
-                print(f"  {VERDE}[SUCESSO] Node.js instalado corretamente!{RESET}")
-                return True
-            except subprocess.CalledProcessError:
-                print(f"  {VERMELHO}[ERRO] Falha na instalação automática do Node.js.{RESET}")
-                return False
-        else:
-            print(f"  {VERMELHO}[ERRO] Auto-instalação suportada apenas no Linux. Instale o Node.js manualmente.{RESET}")
-            return False
-
-
-def download_media(url, resolution, output_path, audio_only):
-    res_limit = resolution.replace('p', '')
-    pasta = "Audios" if audio_only else "Videos"
-    output_path_clean = output_path.replace('\\', '/')
-
-    out_template = f"{output_path_clean}/{pasta}/%(title)s.%(ext)s"
-
-    print(f"{AZUL}Analisando o link para organizar as pastas...{RESET}")
-
-    try:
-        import yt_dlp
-        check_opts = {
-            'extract_flat': True,
-            'quiet': True,
-            'ignoreerrors': True,
-            'js_runtimes': {'node': {}},
-        }
-        with yt_dlp.YoutubeDL(check_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-
-            if info and info.get('_type') == 'playlist':
-                entries = info.get('entries', [])
-                if entries and len(list(entries)) > 1:
-                    print(f"{VERDE}Playlist com múltiplas músicas detectada! Criando pasta própria...{RESET}")
-                    out_template = f"{output_path_clean}/%(playlist_title)s/%(playlist_index)02d - %(title)s.%(ext)s"
-                else:
-                    print(f"{AMARELO}Playlist de item único detectada. Salvando em '{pasta}'...{RESET}")
-            else:
-                print(f"{AMARELO}Vídeo avulso detectado! Salvando em '{pasta}'...{RESET}")
-
-    except Exception as e:
-        print(f"{AMARELO}Aviso: Não foi possível escanear o link ({e}). Usando pasta padrão...{RESET}")
-
-    ydl_opts: dict = {
-        'outtmpl': out_template,
-        'ignoreerrors': True,
-        'quiet': False,
-        'noplaylist': False,
-        'windowsfilenames': True,
-        'js_runtimes': {'node': {}},
-        'extractor_args': {'youtube': ['player_client=android,ios']},
-        'remote_components': ['ejs:github'],
-    }
-
-    if audio_only:
-        print(f"\n{AMARELO}Modo: Somente Áudio (MP3) de Playlist/Vídeo{RESET}")
-        ydl_opts.update({
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        })
-    else:
-        print(f"\n{AMARELO}Modo: Vídeo (MP4) de Playlist/Vídeo - Resolução máxima: {resolution}{RESET}")
-        ydl_opts.update({
-            'format': f'bestvideo[height<={res_limit}][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'merge_output_format': 'mp4'
-        })
-
-    try:
-        import yt_dlp
-        print(f"{AZUL}\nIniciando o yt-dlp...{RESET}")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        print(f"\n{VERDE}Processo concluído com sucesso! Verifique a pasta base: {output_path}{RESET}")
-    except Exception as e:
-        print(f"\n{VERMELHO}Erro durante o processamento: {e}{RESET}")
-
-
-def main():
-    if len(sys.argv) == 1:
-        print(INSTRUCOES)
+    # Handle special flags first
+    if args.changelog:
+        print_changelog()
         sys.exit(0)
 
-    install_python_dependencies()
+    if args.url is None:
+        print_help()
+        sys.exit(0)
 
-    try:
-        import yt_dlp
-    except ImportError as e:
-        print(f"\n{VERMELHO}[ERRO] Falha ao importar bibliotecas: {e}{RESET}")
+    if args.forget_cookies:
+        forget_auth(args.platform)
+        print_success("Configuração de cookies removida.")
+        sys.exit(0)
+
+    # Check Python dependencies
+    if not args.no_auto_deps:
+        if not check_python_deps():
+            install_python_deps()
+    else:
+        # Still verify imports work
+        try:
+            import yt_dlp
+        except ImportError as e:
+            print_error(f"Falha ao importar yt-dlp: {e}")
+            print_error("Execute sem --no-auto-deps ou instale manualmente: pip install yt-dlp")
+            sys.exit(1)
+
+    check_ytdlp_version()
+
+    # Determine platform
+    platform_name = args.platform
+    if platform_name == "AUTO" or not platform_name:
+        detected = detect_platform_from_url(args.url)
+        if detected:
+            platform_name = detected
+            print_info(f"Plataforma detectada automaticamente: {platform_name}")
+        else:
+            platform_name = "YT"
+            print_warning(f"Não foi possível detectar a plataforma. Usando padrão: {platform_name}")
+
+    platform_cls = get_platform(platform_name)
+    if not platform_cls:
+        print_error(f"Plataforma desconhecida: {platform_name}")
+        print_error(f"Plataformas disponíveis: {', '.join(list_platforms())}")
         sys.exit(1)
 
-    import argparse
-    parser = argparse.ArgumentParser(description="Baixa vídeos (MP4) ou áudios (MP3) do YouTube. Suporta Playlists.",
-                                     epilog="Exemplo: python youtube_downloader.py \"URL\" -a")
-    parser.add_argument("url", help="URL do vídeo ou playlist (SEMPRE USE ASPAS).")
-    parser.add_argument("-r", "--resolution", default="1080p",
-                        help="Resolução máxima do vídeo (ex: 720p, 1080p)")
-    parser.add_argument("-o", "--output", default="Youtube_Downloads",
-                        help="Pasta base de saída.")
-    parser.add_argument("-a", "--audio", action="store_true", help="Baixar somente áudio em MP3.")
-    args = parser.parse_args()
+    platform = platform_cls()
 
-    os.makedirs(args.output, exist_ok=True)
+    # Determine output directory
+    output_dir = args.output or platform.get_default_output_dir()
+    output_path = Path(output_dir).resolve()
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    if not check_ffmpeg() or not check_nodejs():
-        print(f"\n{VERMELHO}O script não pode continuar sem as dependências do sistema.{RESET}")
+    # Check system dependencies
+    if not check_system_deps(args):
+        print_error("O script não pode continuar sem as dependências do sistema.")
+        print_error("Execute 'installer/install_deps.bat' (Windows) ou 'installer/install_deps.sh' (Linux)")
         sys.exit(1)
 
-    download_media(args.url, args.resolution, args.output, args.audio)
+    # Prepare options
+    opts = platform.prepare_opts(args, args.url)
+
+    # Build format options
+    from downloader.formats import FormatOptions, get_platform_subdirs
+    video_subdir, audio_subdir = get_platform_subdirs(platform_name, args.audio)
+    fmt_opts = FormatOptions(
+        audio_only=args.audio,
+        resolution=args.resolution,
+        output_path=output_path,
+        subdir=audio_subdir if args.audio else video_subdir,
+    )
+
+    # Execute download
+    success, error = platform.download(args.url, opts, output_path, fmt_opts)
+
+    if success:
+        # Save auth for Instagram (and other platforms if they implement it)
+        if args.platform == "ITG":
+            if args.cookie_file:
+                from config.store import remember_auth
+                remember_auth("ITG", {"cookie_file": str(Path(args.cookie_file).resolve())})
+            elif args.cookies:
+                from config.store import remember_auth
+                remember_auth("ITG", {"browser": args.cookies})
+        sys.exit(0)
+    else:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

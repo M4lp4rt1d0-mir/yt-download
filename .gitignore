@@ -1,19 +1,16 @@
-# 2 e 3: Pastas de Downloads de mídia
+# Pastas de Downloads de mídia e versões anteriores
 Youtube_Downloads/
 Downloads_YT/
+instagram_downloads/
+facebook_downloads/
+twitter_downloads/
+criacoes_testes-vercoes_anteriores/
 
-# 1, 4 e 5: Arquivos de texto e rascunhos locais
-codigo do marcos.txt
-CM mod.txt
-CMP.txt
-CM.txt
+# Arquivos parciais/temporários do yt-dlp
+*.part
+*.ytdl
 
-# 6, 7 e 8: Cópias e scripts secundários
-main-copia.py
-youtube_downloader.py
-youtube_downloader (1).py
-
-# 9 e 10: Pastas virtuais e configurações internas do PyCharm / Python
+# Pastas virtuais e configurações internas do PyCharm / Python
 .idea/
 __pycache__/
 *.pyc
