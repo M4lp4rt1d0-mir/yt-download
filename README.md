@@ -166,5 +166,9 @@ MIT
 
 ## Autores
 
-- Marcos Xavier (sis.marcosxavier@gmail.com) - https://github.com/marcosxavierdev
-- S. Brenno (sbrennopqd@gmail.com) - https://github.com/M4lp4rt1d0-mir
+| 👥 DEVs | 📧 Email | 🐙 GitHub |
+| :-- | :-- | :-- |
+|@Marcos Xavier | sis.marcosxavier@gmail.com | [**@marcosxavierdev**](https://github.com/marcosxavierdev) |
+| @Brenno m4lp4rt1d0 | sbrennopqd@gmail.com | [**@M4lp4rt1d0-mir**](https://github.com/M4lp4rt1d0-mir) |
+
+Sinta-se à vontade para entrar em contato ou pull requests para melhorias!
